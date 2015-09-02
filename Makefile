@@ -1,13 +1,15 @@
 all: group compiler
+LEX=flex
 
 group:
         echo "Sambit Mishra : mishra22 , Gurleen Kaur : kaur46 "
 
-compiler: helloworld
+compiler: Micro
 
-helloworld: helloworld.c
-        $(CC) -o $@ $<
+Micro :
+
+
 
 clean:
-        rm helloworld
+        rm Micro
 

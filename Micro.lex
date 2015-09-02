@@ -3,14 +3,15 @@ ALPHA [a-zA-Z]
 
 FLOATLITERAL {DIGIT}+"."{DIGIT}*
 INTLITERAL {DIGIT}+
+
 KEYWORD PROGRAM|BEGIN|END|FUNCTION|READ|WRITE|IF|ELSE|FI|FOR|ROF|CONTINUE|BREAK|RETURN|INT|VOID|STRING|FLOAT
-COMMENT --(Not(\n))*\n 
-IDENITIFIER {ALPHA}+({ALPHA}{DIGIT})*
+COMMENT --[^\n]*\n 
+IDENTIFIER {ALPHA}+({ALPHA}{DIGIT})*
 
 OPERATOR  [\:=\+\-\*\/\=\!=\<\>\(\)\;\,\<=\>=]
-STRINGLITERAL 	"(Not(\0))*"
+STRINGLITERAL 	\"(\\.|[^"])*\"
 
-
+EATUP [\n \t]
 
 
 %%
@@ -26,16 +27,16 @@ STRINGLITERAL 	"(Not(\0))*"
 {STRINGLITERAL}							{printf("Token Type: STRINGLITERAL\n");
 										printf("Value: %s\n",(yytext));	}								
 
-{COMMENT}								{printf("ignoring comment\n");}									
+{COMMENT}								{printf("");}									
 										
 {OPERATOR}								{printf("Token Type: OPERATOR\n");
 										printf("Value: %s\n",(yytext));	}	
 										
-{IDENITIFIER}							{printf("Token Type: IDENITIFIER\n");
+{IDENTIFIER}							{printf("Token Type: IDENTIFIER\n");
 										printf("Value: %s\n",(yytext));	}
 
 									
-
+{EATUP}								{printf("");}
 
 
 								

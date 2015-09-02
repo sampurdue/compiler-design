@@ -3,3 +3,4 @@ lex.yy.c
 *.back
 Micro
 *.swp
+output

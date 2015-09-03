@@ -8,7 +8,7 @@ KEYWORD PROGRAM|BEGIN|END|FUNCTION|READ|WRITE|IF|ELSE|FI|FOR|ROF|CONTINUE|BREAK|
 COMMENT --[^\n]*\n 
 IDENTIFIER {ALPHA}+({ALPHA}{DIGIT})*
 
-OPERATOR  [\:=\+\-\*\/\=\!=\<\>\(\)\;\,\<=\>=]
+OPERATOR  ":="|"+"|"-"|"*"|"/"|"="|"!="|"<"|">"|"("|")"|";"|","|"<="|">="
 STRINGLITERAL 	\"(\\.|[^"])*\"
 
 EATUP [\n \t]

@@ -4,3 +4,4 @@ lex.yy.c
 Micro
 *.swp
 output
+./step1/Output/*

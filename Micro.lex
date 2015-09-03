@@ -6,7 +6,7 @@ INTLITERAL {DIGIT}+
 
 KEYWORD PROGRAM|BEGIN|END|FUNCTION|READ|WRITE|IF|ELSE|FI|FOR|ROF|CONTINUE|BREAK|RETURN|INT|VOID|STRING|FLOAT
 COMMENT --[^\n]*\n 
-IDENTIFIER {ALPHA}+({ALPHA}{DIGIT})*
+IDENTIFIER {ALPHA}+({ALPHA}|{DIGIT})*
 
 OPERATOR  ":="|"+"|"-"|"*"|"/"|"="|"!="|"<"|">"|"("|")"|";"|","|"<="|">="
 STRINGLITERAL 	\"(\\.|[^"])*\"
@@ -19,7 +19,7 @@ EATUP [\n \t]
 										printf("Value: %d\n",atoi(yytext));	}	
 
 {FLOATLITERAL}								{printf("Token Type: FLOATLITERAL\n");
-										printf("Value: %f\n",atof(yytext));	}	
+										printf("Value: %s\n",(yytext));	}	
 
 {KEYWORD}								{printf("Token Type: KEYWORD\n");
 										printf("Value: %s\n",(yytext));	}

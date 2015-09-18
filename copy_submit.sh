@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TARGET_DIR=~/smishra
+TARGET_DIR=~/mishra22
 
 
 cp Makefile $TARGET_DIR/

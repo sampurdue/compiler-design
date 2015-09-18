@@ -15,7 +15,7 @@ PARSERGENH=parser.tab.h
 MAINFILE=MicroMain.c
 
 group:
-	echo "Sambit Mishra : mishra22, Gurleen Kaur : kaur46"
+	@echo "Sambit Mishra : mishra22, Gurleen Kaur : kaur46"
 
 compiler: Micro
 
@@ -38,6 +38,6 @@ parser:
 	@cp $(PARSERGENH) $(GEN_DIR)/
 
 clean:
-	@rm Micro
-	@rm -rf generated
-	@rm -rf build
+	@if [ -f $(MICRO) ]; then rm $(MICRO); fi
+	@if [ -d $(GEN_DIR) ]; then rm -rf $(GEN_DIR); fi
+	@if [ -d $(BUILD_DIR) ]; then rm -rf $(BUILD_DIR); fi

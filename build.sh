@@ -1,5 +1,7 @@
 #!/bin/sh
-
-
+rm Micro
+bison -d parser.y
 flex Micro.lex
-gcc lex.yy.c -o Micro -lfl
+gcc -o Micro Micro.c parser.tab.c lex.yy.c -lfl
+
+

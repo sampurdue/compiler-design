@@ -5,3 +5,6 @@ Micro
 *.swp
 output
 ./step1/Output/*
+./step2/Output/*
+./generated
+./build

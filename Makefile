@@ -1,10 +1,10 @@
 all: group compiler
-CC=gcc
+CC=g++
 LEX=flex
 BISON=bison
 LEXFILE=lex.yy.c
 GRAMMARFILE=Micro.lex
-CFLAGS=-lfl -I $(GEN_DIR)/
+CFLAGS=-g -Wall -lfl -I $(GEN_DIR)/ -I $(SRC_DIR)/
 BUILD_DIR=build
 GEN_DIR=generated
 MICRO=Micro

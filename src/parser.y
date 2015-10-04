@@ -1,10 +1,24 @@
 %{
 #include <stdio.h>
+#include "symbolTable.h"
+
 #define YYDEBUG 1
+
 extern int linenum;
+extern int currVarType;
+extern int ongoingDecl;
 extern int yylex();
 extern char* yytext;
+
+/* local variable defn*/
 int accepted;
+std::stack<char*> nameStack ;
+
+/* local function defn*/
+void createGlobalTable();
+void createBlockTable(char* blockName);
+void finishScope();
+
 void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n", s,linenum+1); */}
 %}
 
@@ -17,14 +31,18 @@ void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n"
 
 /* token definition */
 
-%token INT VOID
-%token FLOAT
+%token <iVal>INT VOID
+%token <iVal>FLOAT
 %token CASE  IF ELSE FOR ROF CONTINUE BREAK RETURN FI
 %token PROGRAM WRITE STRING READ _BEGIN END FUNCTION
 %token <str> IDENTIFIER STRINGLITERAL
 %token <iVal> INTLITERAL 
 %token <fval> FLOATLITERAL
 %token <iVal> ASSIGN_OP ADD_OP MINUS_OP MUL_OP DIV_OP EQ_OP NEQ_OP LE_OP GT_OP LBT_OP RBR_OP SC_OP LTE_OP GTE_OP
+
+%type <iVal> var_type
+%type <str> id 
+
 
 
 
@@ -33,8 +51,8 @@ void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n"
 
 %%
 /* Program */
-program           : PROGRAM id _BEGIN pgm_body END 
-id                : IDENTIFIER
+program           : PROGRAM {ongoingDecl = 0; printf("Symbol table GLOBAL\n");} id _BEGIN {createGlobalTable();} pgm_body END 
+id                : IDENTIFIER										{$$ = $1; }
 pgm_body          : decl func_declarations
 decl		        : string_decl decl | var_decl decl | /*empty*/
 
@@ -43,11 +61,11 @@ string_decl       : STRING id ASSIGN_OP str ';'
 str               : STRINGLITERAL
 
 /* Variable Declaration */
-var_decl          : var_type id_list ';'
-var_type	        : FLOAT | INT
+var_decl          : var_type id_list ';' {/*printf("Yohoo got a variable decl at linenum %d\n",linenum+1);*/while(!nameStack.empty()){printf("name  %s type %s\n",nameStack.top(), ((currVarType == INT)?"INT":"FLOAT"));nameStack.pop();}currVarType=-1;}
+var_type	      : FLOAT{$$ = FLOAT; currVarType = FLOAT;ongoingDecl = 10;} | INT {$$ = INT;currVarType = INT;ongoingDecl = 10;}
 any_type          : var_type | VOID 
-id_list           : id id_tail
-id_tail           : ',' id id_tail | /*empty*/
+id_list           : id id_tail {if(currVarType != -1){/*printf("Pushing single %s\n",$1);*/nameStack.push($1);}}
+id_tail           : ',' id id_tail {if(currVarType != -1){/*printf("Pushing list %s\n",$2);*/nameStack.push($2);}} | /*empty*/ 
 
 /* Function Paramater List */
 param_decl_list   : param_decl param_decl_tail | /*empty*/
@@ -56,7 +74,7 @@ param_decl_tail   : ',' param_decl param_decl_tail | /*empty*/
 
 /* Function Declarations */
 func_declarations : func_decl func_declarations | /*empty*/
-func_decl         : FUNCTION any_type id '('param_decl_list')' _BEGIN func_body END
+func_decl         : FUNCTION any_type {currVarType=-1;} id {printf("Symbol table %s\n",$4);} '('param_decl_list')' _BEGIN {createBlockTable($4);} func_body END {finishScope();}
 func_body         : decl stmt_list 
 
 /* Statement List */
@@ -106,3 +124,30 @@ aug_else_part     : ELSE decl aug_stmt_list | /*empty*/
 
 
 %%
+
+void createGlobalTable()
+{
+	symTab* temp = createSymbolTable("GLOBAL");
+	symTabList.push_back(temp);
+	currSymTab = temp;
+}
+
+void createBlockTable(char* blockName)
+{
+	symTab* temp = createSymbolTable(blockName);
+	symTabList.push_back(temp);
+	symTabStack.push(currSymTab);
+	currSymTab = temp;
+}
+
+void finishScope()
+{
+	currSymTab = symTabStack.top();
+	symTabStack.pop(); 
+}
+
+void addElementsToTable()
+{
+	
+}
+

@@ -27,10 +27,10 @@ int main(int argc, char *argv[])
 	
 	if(accepted == 0)
 	{	
-		printf("Accepted\n");
+	//	printf("Accepted\n");
 	}else
 	{
-		printf("Not accepted\n");
+	//	printf("Not accepted\n");
 	}
 
 	return 0;

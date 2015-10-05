@@ -10,6 +10,9 @@
 #include "parser.tab.h"
 using namespace std;
 
+
+/*Data type definitions */
+
 typedef union 
 {
 	int iVal;
@@ -44,26 +47,31 @@ class symTab
 	stringList* hashTable[10];
 	
 	symTab() {blockName = NULL; symList = new list<Symbol*>();}
-	symTab(char const* name){int i =0; while(i<10){hashTable[i++] = NULL;}blockName = strndup(name, strlen(name)); symList = new list<Symbol*>();}
-	~symTab(){free(blockName); delete(symList);}
+	symTab(char* name);
+	~symTab();
 	
 };
 
-
-
+/*Function declarations */
 
 void printSymbol(Symbol* sym);
 void freeSymbol(Symbol* sym);
-void printSymbolTable(symTab* symTable);
-symTab* createSymbolTable(char const* blockName);
-void freeSymbolTable(symTab* symTable);
+
+symTab* createSymbolTable(char* blockName);
 void addElementToTable(symTab* symTable, Symbol* sym);
-void printTableList();
+void freeSymbolTable(symTab* symTable);
+void printSymbolTable(symTab* symTable);
+
 int addToHashTable(char* str, symTab* Table);
+void freeHashTable(stringList* hashTable[]);
 int hash(char* str);
 void printhashTable(symTab* Table);
+
 int checkShadowVariable(Symbol* sym);
 int checkShadowVariableInTable(symTab* symTable, Symbol* sym);
+
+void printTableList();
+void freeAllTables();
 
 
 #endif //end symbol table definitions

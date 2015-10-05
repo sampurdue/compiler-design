@@ -4,7 +4,7 @@ LEX=flex
 BISON=bison
 LEXFILE=lex.yy.c
 GRAMMARFILE=Micro.lex
-CFLAGS=-g -Wall -lfl -I $(GEN_DIR)/ -I $(SRC_DIR)/
+CFLAGS= -lfl -I $(GEN_DIR)/ -I $(SRC_DIR)/
 BUILD_DIR=build
 GEN_DIR=generated
 MICRO=Micro
@@ -23,7 +23,7 @@ compiler: Micro
 Micro: lexer
 	@$(CC) -o $(MICRO) $(SRC_DIR)/$(MAINFILE) $(GEN_DIR)/$(PARSERGENC) $(SRC_DIR)/$(SYMTAB) $(GEN_DIR)/$(LEXFILE)  $(CFLAGS)
 	@mkdir -p $(BUILD_DIR)
-	@cp $(MICRO) $(BUILD_DIR)
+	@mv $(MICRO) $(BUILD_DIR)
 	@rm $(PARSERGENC) $(PARSERGENH) $(LEXFILE)	
 
 lexer:	parser

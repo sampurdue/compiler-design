@@ -63,7 +63,7 @@ void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n"
 %%
 /* Program */
 program           : PROGRAM {ongoingDecl = 0; } id _BEGIN {createGlobalTable();} pgm_body END 
-id                : IDENTIFIER										{$$ = $1; }
+id                : IDENTIFIER										{$$ = $1;}
 pgm_body          : decl func_declarations
 decl		        : string_decl decl | var_decl decl | /*empty*/
 
@@ -139,7 +139,8 @@ aug_else_part     : ELSE {createBlockTable(++blockNum);} decl aug_stmt_list | /*
 void createGlobalTable()
 {
 	//printf("creating global table\n");
-	symTab* temp = createSymbolTable("GLOBAL");
+	char *str = strdup("GLOBAL");
+	symTab* temp = createSymbolTable(str);
 	symTabList.push_back(temp);
 	currSymTab = temp;
 }
@@ -148,7 +149,8 @@ void createBlockTable(int blockNum)
 {
 	char str[20] = {0,};
 	sprintf(str,"%s%d","BLOCK ",blockNum);
-	createBlockTable(str);
+	char *buf = strdup(str);
+	createBlockTable(buf);
 }
 
 
@@ -186,7 +188,8 @@ void addElementsToTable()
 void addStringElementToTable(char* varName, char* strValue)
 {
 	Value tempVal;
-	tempVal.strVal = strndup(strValue, strlen((const char*)strValue));;
+	//tempVal.strVal = strndup(strValue, strlen((const char*)strValue));
+	tempVal.strVal = strValue;
 	Symbol* tempSym = new Symbol(STRING, varName,tempVal);
 	addElementToTable(currSymTab, tempSym);
 }

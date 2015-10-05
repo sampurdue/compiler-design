@@ -1565,7 +1565,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 66 "src/parser.y"
-    {(yyval.str) = (yyvsp[(1) - (1)].str); ;}
+    {(yyval.str) = (yyvsp[(1) - (1)].str);;}
     break;
 
   case 10:
@@ -1894,7 +1894,8 @@ yyreturn:
 void createGlobalTable()
 {
 	//printf("creating global table\n");
-	symTab* temp = createSymbolTable("GLOBAL");
+	char *str = strdup("GLOBAL");
+	symTab* temp = createSymbolTable(str);
 	symTabList.push_back(temp);
 	currSymTab = temp;
 }
@@ -1903,7 +1904,8 @@ void createBlockTable(int blockNum)
 {
 	char str[20] = {0,};
 	sprintf(str,"%s%d","BLOCK ",blockNum);
-	createBlockTable(str);
+	char *buf = strdup(str);
+	createBlockTable(buf);
 }
 
 
@@ -1941,7 +1943,8 @@ void addElementsToTable()
 void addStringElementToTable(char* varName, char* strValue)
 {
 	Value tempVal;
-	tempVal.strVal = strndup(strValue, strlen((const char*)strValue));;
+	//tempVal.strVal = strndup(strValue, strlen((const char*)strValue));
+	tempVal.strVal = strValue;
 	Symbol* tempSym = new Symbol(STRING, varName,tempVal);
 	addElementToTable(currSymTab, tempSym);
 }

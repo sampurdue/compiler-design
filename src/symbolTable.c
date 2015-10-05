@@ -7,6 +7,7 @@ symTab* currSymTab;
 list<char*> declErrList ;
 list<char*> shadowVarList;
 
+/* class member definitions */
 
 Symbol::Symbol(int varType, char* str, Value val)
 {
@@ -16,18 +17,41 @@ Symbol::Symbol(int varType, char* str, Value val)
 	}
 	else
 	{
-		name = strndup(str, strlen(str));
+		//name = strndup(str, strlen(str));
+		name = str;
 		type = varType;
 		symVal = val;
 	}		
 }
+
+symTab::symTab(char* name)
+{	
+	int i =0; 
+	while(i<10)
+	{
+		hashTable[i++] = NULL;
+	}
+	//blockName = strndup(name, strlen(name)); 
+	blockName = name;
+	symList = new list<Symbol*>();
+}
+
+symTab::~symTab()
+{
+	free(blockName);
+	list<Symbol*>::iterator it = symList->begin(); 
+	for(; it != symList->end(); it++){delete(*it);} 
+	freeHashTable(hashTable);
+	delete(symList);
+}
+
+/* Other function definitions*/
 
 void printSymbol(Symbol* sym)
 {
 	printf("Symbol info for %s\n", sym->name);
 	printf("Symbol type %s\n", (sym->type == INT)?"INT":((sym->type == FLOAT)?"FLOAT":"STRING"));
 }
-
 
 void freeSymbol(Symbol* sym)
 {
@@ -37,10 +61,49 @@ void freeSymbol(Symbol* sym)
 	}
 	else
 	{
-		free (sym->name);
-		delete sym;
+		delete(sym);
 	}
 }
+
+symTab* createSymbolTable(char* blockName)
+{
+	symTab* temp = new symTab(blockName);
+	return temp;
+}
+
+void addElementToTable(symTab* symTable, Symbol* sym)
+{
+	//printSymbol(sym);
+	int found = addToHashTable(sym->name, symTable);
+	int shadowVar = checkShadowVariable(sym);
+	int insert = 10;
+
+	if(found == 0)
+	{
+		declErrList.push_back(sym->name);
+	}
+	else if(shadowVar == 0)
+	{
+		list<char*>::iterator it = shadowVarList.begin();
+		for(; it != shadowVarList.end(); it++)
+		{
+			insert = strcmp(*it, sym->name);
+			if(insert == 0) {break;};
+		}
+		if(insert != 0)
+		{
+			shadowVarList.push_back(sym->name);
+		}
+	}
+	symTable->symList->push_back(sym);
+	
+}
+
+void freeSymbolTable(symTab* symTable)
+{
+	delete(symTable);
+}
+
 void printSymbolTable(symTab* symTable)
 {
 	Symbol *temp;
@@ -63,84 +126,6 @@ void printSymbolTable(symTab* symTable)
 		}
 		
 	}
-}
-symTab* createSymbolTable(char const* blockName)
-{
-	symTab* temp = new symTab(blockName);
-	return temp;
-}
-
-void freeSymbolTable(symTab* symTable)
-{
-	delete symTable;
-}
-void addElementToTable(symTab* symTable, Symbol* sym)
-{
-	//printSymbol(sym);
-	int found = addToHashTable(sym->name, symTable);
-	int shadowVar = checkShadowVariable(sym);
-	//printf("Match %d for %s\n",found, sym->name);
-	//int found = 10;
-	if(found == 0)
-	{
-		declErrList.push_back(sym->name);
-	}
-	else if(shadowVar == 0)
-	{
-		shadowVarList.push_back(sym->name);
-	}
-	symTable->symList->push_back(sym);
-	
-}
-
-
-void printTableList()
-{
-
-	if(declErrList.size() != 0)
-	{
-		list<char*>::iterator it = declErrList.begin();
-		//for(; it != declErrList.end(); it++)
-		//{
-			printf("DECLARATION ERROR %s\n",*it);
-		//}
-	}
-	else
-	{
-	
-		list<char*>::iterator shadowIt = shadowVarList.begin();
-		for(; shadowIt != shadowVarList.end(); shadowIt++)
-		{
-			printf("SHADOW WARNING %s\n",*shadowIt);
-		}
-	
-		list<symTab*>::iterator it = symTabList.begin();
-		list<symTab*>::iterator listEnd = symTabList.end();
-		for( ; it != listEnd; it++)
-		{
-			printSymbolTable(*it);
-		}
-	}
-}
-
-
-int hash(char* str)
-{
-	char* temp = str;
-	unsigned int key = 0;
-	if(str == NULL)
-	{
-		return -1;
-	}
-	else
-	{
-		while(*temp != 0)
-		{
-				key += *(temp++);
-		}
-	}
-	//printf("Key calculated for %s is %d\n",str, key%10);
-	return key%10;
 }
 
 int addToHashTable(char* str, symTab* Table)
@@ -173,8 +158,41 @@ int addToHashTable(char* str, symTab* Table)
 		prev->next = tempStr;
 	}
 	//printhashTable(Table);
-	//printf("Match %d before return\n",found);
 	return found;
+}
+
+void freeHashTable(stringList* hashTable[])
+{
+	for(int i =0; i < 10; i++)
+	{
+		stringList* curr = hashTable[i];
+		stringList* next ;
+		while(curr != NULL)
+		{
+			next = curr->next;
+			free(curr);
+			curr = next;
+		}
+	}
+}
+
+int hash(char* str)
+{
+	char* temp = str;
+	unsigned int key = 0;
+	if(str == NULL)
+	{
+		return -1;
+	}
+	else
+	{
+		while(*temp != 0)
+		{
+				key += *(temp++);
+		}
+	}
+	//printf("Key calculated for %s is %d\n",str, key%10);
+	return key%10;
 }
 
 void printhashTable(symTab* Table)
@@ -183,16 +201,13 @@ void printhashTable(symTab* Table)
 	for(int i = 0; i<10; i++)
 	{
 		printf("Index %d \n", i);
-		//if(Table->hashTable[i] != NULL)
-		//{
-			curr = Table->hashTable[i];
-			while(curr != NULL)
-			{
-				printf("%s ", curr->str);
-				curr = curr->next;
-			}
-			printf("\n");
-		//}
+		curr = Table->hashTable[i];
+		while(curr != NULL)
+		{
+			printf("%s ", curr->str);
+			curr = curr->next;
+		}
+		printf("\n");
 	}
 }
 
@@ -212,9 +227,7 @@ int checkShadowVariableInTable(symTab* symTable, Symbol* sym)
 		{
 			if(found != 0)
 			{
-				
 				found = strcmp(sym->name, curr->str);
-				//printf("comparing %s and %s found value %d\n",sym->name, curr->str, found);
 			}	
 			else
 			{
@@ -223,7 +236,6 @@ int checkShadowVariableInTable(symTab* symTable, Symbol* sym)
 			curr = curr->next;
 		}
 	}
-	//printf("match found for shadow %d \n", found);
 	return found;
 }
 
@@ -246,6 +258,44 @@ int checkShadowVariable(Symbol* sym)
 		symTabStack.push(*it);
 	}
 	while(!shadowSymTabList.empty()){shadowSymTabList.pop_front();}
-
 	return found;
+}
+
+void printTableList()
+{
+
+	if(declErrList.size() != 0)
+	{
+		list<char*>::iterator it = declErrList.begin();
+		//for(; it != declErrList.end(); it++)
+		//{
+			printf("DECLARATION ERROR %s\n",*it);
+		//}
+	}
+	else
+	{
+	
+		list<char*>::iterator shadowIt = shadowVarList.begin();
+		for(; shadowIt != shadowVarList.end(); shadowIt++)
+		{
+			printf("SHADOW WARNING %s\n",*shadowIt);
+		}
+	
+		list<symTab*>::iterator it = symTabList.begin();
+		list<symTab*>::iterator listEnd = symTabList.end();
+		for( ; it != listEnd; it++)
+		{
+			printSymbolTable(*it);
+		}
+	}
+	freeAllTables();
+}
+
+void freeAllTables()
+{
+	list<symTab*>::iterator it = symTabList.begin();
+	for(; it != symTabList.end(); it++)
+	{
+		freeSymbolTable(*it);
+	}
 }

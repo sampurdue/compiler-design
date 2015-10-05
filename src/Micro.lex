@@ -77,7 +77,7 @@ EATUP [\n \t\r]
 {COMMENT}								{;}									
 										
 										
-{IDENTIFIER}							{yylval.str = strdup(yytext);return IDENTIFIER;;	}
+{IDENTIFIER}							{yylval.str = strdup(yytext);return IDENTIFIER;	}
 
 									
 {EATUP}								{;}

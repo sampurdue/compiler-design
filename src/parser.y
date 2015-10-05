@@ -5,10 +5,17 @@
 #define YYDEBUG 1
 
 extern int linenum;
-extern int currVarType;
-extern int ongoingDecl;
+int currVarType;
+int ongoingDecl;
 extern int yylex();
 extern char* yytext;
+
+extern list<symTab*> symTabList;
+extern list<symTab*> shadowSymTabList;
+extern stack<symTab*> symTabStack;
+extern symTab* currSymTab;
+extern list<char*> declErrList ;
+extern list<char*> shadowVarList;
 
 /* local variable defn*/
 int accepted;

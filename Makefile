@@ -21,7 +21,7 @@ group:
 compiler: Micro
 
 Micro: lexer
-	@$(CC) -o $(MICRO) $(SRC_DIR)/$(MAINFILE) $(GEN_DIR)/$(PARSERGENC) $(GEN_DIR)/$(LEXFILE)  $(CFLAGS)
+	@$(CC) -o $(MICRO) $(SRC_DIR)/$(MAINFILE) $(GEN_DIR)/$(PARSERGENC) $(SRC_DIR)/$(SYMTAB) $(GEN_DIR)/$(LEXFILE)  $(CFLAGS)
 	@mkdir -p $(BUILD_DIR)
 	@cp $(MICRO) $(BUILD_DIR)
 	@rm $(PARSERGENC) $(PARSERGENH) $(LEXFILE)	

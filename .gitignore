@@ -6,5 +6,6 @@ Micro
 output
 ./step1/Output/*
 ./step2/Output/*
+./step3/Output/*
 ./generated
 ./build

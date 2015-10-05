@@ -3,6 +3,7 @@ extern int yyparse();
 extern FILE *yyin;
 extern int yydebug;
 extern int accepted ;
+extern void printTableList();
 
 int main(int argc, char *argv[])
 {
@@ -28,9 +29,11 @@ int main(int argc, char *argv[])
 	if(accepted == 0)
 	{	
 	//	printf("Accepted\n");
+		printTableList();
 	}else
 	{
 	//	printf("Not accepted\n");
+		printf("Delcaration error\n");
 	}
 
 	return 0;

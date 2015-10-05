@@ -13,11 +13,15 @@ extern char* yytext;
 /* local variable defn*/
 int accepted;
 std::stack<char*> nameStack ;
+int blockNum =0;
 
 /* local function defn*/
 void createGlobalTable();
 void createBlockTable(char* blockName);
+void createBlockTable(int blockNum);
 void finishScope();
+void addElementsToTable();
+void addStringElementToTable(char* varName, char* strVal);
 
 void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n", s,linenum+1); */}
 %}
@@ -41,7 +45,7 @@ void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n"
 %token <iVal> ASSIGN_OP ADD_OP MINUS_OP MUL_OP DIV_OP EQ_OP NEQ_OP LE_OP GT_OP LBT_OP RBR_OP SC_OP LTE_OP GTE_OP
 
 %type <iVal> var_type
-%type <str> id 
+%type <str> id str
 
 
 
@@ -51,30 +55,30 @@ void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n"
 
 %%
 /* Program */
-program           : PROGRAM {ongoingDecl = 0; printf("Symbol table GLOBAL\n");} id _BEGIN {createGlobalTable();} pgm_body END 
+program           : PROGRAM {ongoingDecl = 0; } id _BEGIN {createGlobalTable();} pgm_body END 
 id                : IDENTIFIER										{$$ = $1; }
 pgm_body          : decl func_declarations
 decl		        : string_decl decl | var_decl decl | /*empty*/
 
 /* Global String Declaration */
-string_decl       : STRING id ASSIGN_OP str ';'
+string_decl       : STRING id ASSIGN_OP str {addStringElementToTable($2, $4);} ';' 
 str               : STRINGLITERAL
 
 /* Variable Declaration */
-var_decl          : var_type id_list ';' {/*printf("Yohoo got a variable decl at linenum %d\n",linenum+1);*/while(!nameStack.empty()){printf("name  %s type %s\n",nameStack.top(), ((currVarType == INT)?"INT":"FLOAT"));nameStack.pop();}currVarType=-1;}
+var_decl          : var_type id_list ';' {addElementsToTable();}
 var_type	      : FLOAT{$$ = FLOAT; currVarType = FLOAT;ongoingDecl = 10;} | INT {$$ = INT;currVarType = INT;ongoingDecl = 10;}
 any_type          : var_type | VOID 
-id_list           : id id_tail {if(currVarType != -1){/*printf("Pushing single %s\n",$1);*/nameStack.push($1);}}
-id_tail           : ',' id id_tail {if(currVarType != -1){/*printf("Pushing list %s\n",$2);*/nameStack.push($2);}} | /*empty*/ 
+id_list           : id id_tail {if(currVarType != -1){nameStack.push($1);}}
+id_tail           : ',' id id_tail {if(currVarType != -1){nameStack.push($2);}} | /*empty*/ 
 
 /* Function Paramater List */
 param_decl_list   : param_decl param_decl_tail | /*empty*/
-param_decl        : var_type id
+param_decl        : var_type id {nameStack.push($2); addElementsToTable();}
 param_decl_tail   : ',' param_decl param_decl_tail | /*empty*/
 
 /* Function Declarations */
 func_declarations : func_decl func_declarations | /*empty*/
-func_decl         : FUNCTION any_type {currVarType=-1;} id {printf("Symbol table %s\n",$4);} '('param_decl_list')' _BEGIN {createBlockTable($4);} func_body END {finishScope();}
+func_decl         : FUNCTION any_type {currVarType=-1;} id '('{createBlockTable($4);}param_decl_list')' _BEGIN  func_body END {finishScope();}
 func_body         : decl stmt_list 
 
 /* Statement List */
@@ -103,8 +107,8 @@ addop             : '+' | '-'
 mulop             : '*' | '/'
 
 /* Complex Statements and Condition */ 
-if_stmt           : IF '(' cond ')' decl stmt_list else_part FI
-else_part         : ELSE decl stmt_list | /*empty*/
+if_stmt           : IF '(' cond ')' {createBlockTable(++blockNum);} decl stmt_list else_part FI
+else_part         : ELSE {createBlockTable(++blockNum);} decl stmt_list | /*empty*/
 cond              : expr compop expr
 compop            : '<' | '>' | EQ_OP | NEQ_OP | LTE_OP | GTE_OP
 
@@ -112,28 +116,37 @@ init_stmt         : assign_expr | /*empty*/
 incr_stmt         : assign_expr | /*empty*/
 
 /* ECE 573 students use this version of for_stmt */
-for_stmt       : FOR '(' init_stmt ';' cond ';' incr_stmt ')' decl aug_stmt_list ROF 
+for_stmt       : FOR '(' init_stmt ';' cond ';' incr_stmt ')' {createBlockTable(++blockNum);} decl aug_stmt_list ROF 
 
 /* CONTINUE and BREAK statements. ECE 573 students only */
 aug_stmt_list     : aug_stmt aug_stmt_list | /*empty*/
 aug_stmt          : base_stmt | aug_if_stmt | for_stmt | CONTINUE';' | BREAK';'
 
 /* Augmented IF statements for ECE 573 students */ 
-aug_if_stmt       : IF '(' cond ')' decl aug_stmt_list aug_else_part FI
-aug_else_part     : ELSE decl aug_stmt_list | /*empty*/
+aug_if_stmt       : IF '(' cond ')' {createBlockTable(++blockNum);} decl aug_stmt_list aug_else_part FI
+aug_else_part     : ELSE {createBlockTable(++blockNum);} decl aug_stmt_list | /*empty*/
 
 
 %%
 
 void createGlobalTable()
 {
+	//printf("creating global table\n");
 	symTab* temp = createSymbolTable("GLOBAL");
 	symTabList.push_back(temp);
 	currSymTab = temp;
 }
 
+void createBlockTable(int blockNum)
+{
+	char str[20] = {0,};
+	sprintf(str,"%s%d","BLOCK ",blockNum);
+	createBlockTable(str);
+}
+
 void createBlockTable(char* blockName)
 {
+	//printf("creating table for %s\n", blockName);
 	symTab* temp = createSymbolTable(blockName);
 	symTabList.push_back(temp);
 	symTabStack.push(currSymTab);
@@ -142,12 +155,30 @@ void createBlockTable(char* blockName)
 
 void finishScope()
 {
+	//printf("Finished scope for %s\n",currSymTab->blockName);
 	currSymTab = symTabStack.top();
 	symTabStack.pop(); 
 }
 
 void addElementsToTable()
 {
-	
+		while(!nameStack.empty())
+		{
+			char* name = nameStack.top();
+			//printf("name  %s type %s\n",name, ((currVarType == INT)?"INT":"FLOAT"));
+			Value tempVal;
+			tempVal.iVal = 0;
+			Symbol* tempSym = new Symbol(currVarType, name,tempVal);
+			addElementToTable(currSymTab, tempSym);
+			nameStack.pop();
+		}
+		currVarType=-1;
 }
 
+void addStringElementToTable(char* varName, char* strValue)
+{
+	Value tempVal;
+	tempVal.strVal = strndup(strValue, strlen((const char*)strValue));;
+	Symbol* tempSym = new Symbol(STRING, varName,tempVal);
+	addElementToTable(currSymTab, tempSym);
+}

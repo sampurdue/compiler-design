@@ -13,6 +13,7 @@ PARSERFILE=parser.y
 PARSERGENC=parser.tab.c
 PARSERGENH=parser.tab.h
 MAINFILE=MicroMain.c
+SYMTAB=symbolTable.c
 
 group:
 	@echo "Sambit Mishra : mishra22, Gurleen Kaur : kaur46"

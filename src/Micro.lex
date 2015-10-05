@@ -72,7 +72,7 @@ EATUP [\n \t\r]
 {FLOATLITERAL}								{yylval.fval = atof(yytext); return FLOATLITERAL;	}	
 
 
-{STRINGLITERAL}							{return STRINGLITERAL;}								
+{STRINGLITERAL}							{yylval.str = strdup(yytext);return STRINGLITERAL;}								
 
 {COMMENT}								{;}									
 										

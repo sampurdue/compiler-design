@@ -1,5 +1,8 @@
 #include "symbolTable.h"
 
+extern std::stack<char*> nameStack ;
+extern int currVarType;
+
 list<symTab*> symTabList;
 list<symTab*> shadowSymTabList;
 stack<symTab*> symTabStack;
@@ -99,6 +102,29 @@ void addElementToTable(symTab* symTable, Symbol* sym)
 	
 }
 
+void addStringElementToTable(char* varName, char* strValue)
+{
+	Value tempVal;
+	//tempVal.strVal = strndup(strValue, strlen((const char*)strValue));
+	tempVal.strVal = strValue;
+	Symbol* tempSym = new Symbol(STRING, varName,tempVal);
+	addElementToTable(currSymTab, tempSym);
+}
+
+void addElementsToTable()
+{
+		while(!nameStack.empty())
+		{
+			char* name = nameStack.top();
+			//printf("name  %s type %s\n",name, ((currVarType == INT)?"INT":"FLOAT"));
+			Value tempVal;
+			tempVal.iVal = 0;
+			Symbol* tempSym = new Symbol(currVarType, name,tempVal);
+			addElementToTable(currSymTab, tempSym);
+			nameStack.pop();
+		}
+		currVarType=-1;
+}
 void freeSymbolTable(symTab* symTable)
 {
 	delete(symTable);
@@ -299,3 +325,40 @@ void freeAllTables()
 		freeSymbolTable(*it);
 	}
 }
+
+
+
+void createGlobalTable()
+{
+	//printf("creating global table\n");
+	char *str = strdup("GLOBAL");
+	symTab* temp = createSymbolTable(str);
+	symTabList.push_back(temp);
+	currSymTab = temp;
+}
+
+void createBlockTable(int blockNum)
+{
+	char str[20] = {0,};
+	sprintf(str,"%s%d","BLOCK ",blockNum);
+	char *buf = strdup(str);
+	createBlockTable(buf);
+}
+
+
+void createBlockTable(char* blockName)
+{
+	//printf("creating table for %s\n", blockName);
+	symTab* temp = createSymbolTable(blockName);
+	symTabList.push_back(temp);
+	symTabStack.push(currSymTab);
+	currSymTab = temp;
+}
+
+void finishScope()
+{
+	//printf("Finished scope for %s\n",currSymTab->blockName);
+	currSymTab = symTabStack.top();
+	symTabStack.pop(); 
+}
+

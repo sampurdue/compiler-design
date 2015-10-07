@@ -1,6 +1,6 @@
 #!/bin/sh
 CURRDIR=$(pwd)
-BUILD_DIR=$CURRDIR/../build
+BUILD_DIR=$CURRDIR/../
 MICRO=$BUILD_DIR/Micro
 if [ -f $MICRO ]; then
 

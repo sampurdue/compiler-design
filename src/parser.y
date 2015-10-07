@@ -10,12 +10,6 @@ int ongoingDecl;
 extern int yylex();
 extern char* yytext;
 
-extern list<symTab*> symTabList;
-extern list<symTab*> shadowSymTabList;
-extern stack<symTab*> symTabStack;
-extern symTab* currSymTab;
-extern list<char*> declErrList ;
-extern list<char*> shadowVarList;
 
 /* local variable defn*/
 int accepted;
@@ -23,12 +17,7 @@ std::stack<char*> nameStack ;
 int blockNum =0;
 
 /* local function defn*/
-void createGlobalTable();
-void createBlockTable(char* blockName);
-void createBlockTable(int blockNum);
-void finishScope();
-void addElementsToTable();
-void addStringElementToTable(char* varName, char* strVal);
+
 
 void yyerror(const char *s) { accepted = 10;/*printf("ERROR: %s at linenum %d\n", s,linenum+1); */}
 %}
@@ -114,8 +103,8 @@ addop             : '+' | '-'
 mulop             : '*' | '/'
 
 /* Complex Statements and Condition */ 
-if_stmt           : IF '(' cond ')' {createBlockTable(++blockNum);} decl stmt_list else_part FI
-else_part         : ELSE {createBlockTable(++blockNum);} decl stmt_list | /*empty*/
+if_stmt           : IF '(' cond ')' {createBlockTable(++blockNum);} decl stmt_list {finishScope();}else_part FI
+else_part         : ELSE {createBlockTable(++blockNum);} decl stmt_list {finishScope();}| /*empty*/
 cond              : expr compop expr
 compop            : '<' | '>' | EQ_OP | NEQ_OP | LTE_OP | GTE_OP
 
@@ -123,73 +112,15 @@ init_stmt         : assign_expr | /*empty*/
 incr_stmt         : assign_expr | /*empty*/
 
 /* ECE 573 students use this version of for_stmt */
-for_stmt       : FOR '(' init_stmt ';' cond ';' incr_stmt ')' {createBlockTable(++blockNum);} decl aug_stmt_list ROF 
+for_stmt       : FOR '(' init_stmt ';' cond ';' incr_stmt ')' {createBlockTable(++blockNum);} decl aug_stmt_list ROF {finishScope();} 
 
 /* CONTINUE and BREAK statements. ECE 573 students only */
 aug_stmt_list     : aug_stmt aug_stmt_list | /*empty*/
 aug_stmt          : base_stmt | aug_if_stmt | for_stmt | CONTINUE';' | BREAK';'
 
 /* Augmented IF statements for ECE 573 students */ 
-aug_if_stmt       : IF '(' cond ')' {createBlockTable(++blockNum);} decl aug_stmt_list aug_else_part FI
-aug_else_part     : ELSE {createBlockTable(++blockNum);} decl aug_stmt_list | /*empty*/
+aug_if_stmt       : IF '(' cond ')' {createBlockTable(++blockNum);} decl aug_stmt_list {finishScope();} aug_else_part FI
+aug_else_part     : ELSE {createBlockTable(++blockNum);} decl aug_stmt_list {finishScope();}| /*empty*/
 
 
 %%
-
-void createGlobalTable()
-{
-	//printf("creating global table\n");
-	char *str = strdup("GLOBAL");
-	symTab* temp = createSymbolTable(str);
-	symTabList.push_back(temp);
-	currSymTab = temp;
-}
-
-void createBlockTable(int blockNum)
-{
-	char str[20] = {0,};
-	sprintf(str,"%s%d","BLOCK ",blockNum);
-	char *buf = strdup(str);
-	createBlockTable(buf);
-}
-
-
-void createBlockTable(char* blockName)
-{
-	//printf("creating table for %s\n", blockName);
-	symTab* temp = createSymbolTable(blockName);
-	symTabList.push_back(temp);
-	symTabStack.push(currSymTab);
-	currSymTab = temp;
-}
-
-void finishScope()
-{
-	//printf("Finished scope for %s\n",currSymTab->blockName);
-	currSymTab = symTabStack.top();
-	symTabStack.pop(); 
-}
-
-void addElementsToTable()
-{
-		while(!nameStack.empty())
-		{
-			char* name = nameStack.top();
-			//printf("name  %s type %s\n",name, ((currVarType == INT)?"INT":"FLOAT"));
-			Value tempVal;
-			tempVal.iVal = 0;
-			Symbol* tempSym = new Symbol(currVarType, name,tempVal);
-			addElementToTable(currSymTab, tempSym);
-			nameStack.pop();
-		}
-		currVarType=-1;
-}
-
-void addStringElementToTable(char* varName, char* strValue)
-{
-	Value tempVal;
-	//tempVal.strVal = strndup(strValue, strlen((const char*)strValue));
-	tempVal.strVal = strValue;
-	Symbol* tempSym = new Symbol(STRING, varName,tempVal);
-	addElementToTable(currSymTab, tempSym);
-}

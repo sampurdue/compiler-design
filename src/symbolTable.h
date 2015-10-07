@@ -59,6 +59,8 @@ void freeSymbol(Symbol* sym);
 
 symTab* createSymbolTable(char* blockName);
 void addElementToTable(symTab* symTable, Symbol* sym);
+void addStringElementToTable(char* varName, char* strVal);
+void addElementsToTable();
 void freeSymbolTable(symTab* symTable);
 void printSymbolTable(symTab* symTable);
 
@@ -72,6 +74,13 @@ int checkShadowVariableInTable(symTab* symTable, Symbol* sym);
 
 void printTableList();
 void freeAllTables();
+
+
+void createGlobalTable();
+void createBlockTable(char* blockName);
+void createBlockTable(int blockNum);
+void finishScope();
+
 
 
 #endif //end symbol table definitions

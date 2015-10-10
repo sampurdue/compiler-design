@@ -4,7 +4,7 @@ LEX=flex
 BISON=bison
 LEXFILE=lex.yy.c
 GRAMMARFILE=Micro.lex
-CFLAGS= -g -Wall -pg -lfl -I $(GEN_DIR)/ -I $(SRC_DIR)/
+CFLAGS= -g -Wall -pg 
 BUILD_DIR=build
 GEN_DIR=generated
 MICRO=Micro
@@ -14,6 +14,8 @@ PARSERGENC=parser.tab.c
 PARSERGENH=parser.tab.h
 MAINFILE=MicroMain.c
 SYMTAB=symbolTable.c
+IFLAGS= -I $(SRC_DIR) -I $(GEN_DIR)
+LFLAGS= -lfl
 
 group:
 	@echo "Sambit Mishra : mishra22, Gurleen Kaur : kaur46"
@@ -21,9 +23,13 @@ group:
 compiler: Micro
 
 Micro: lexer
-	@$(CC) -o $(MICRO) $(SRC_DIR)/$(MAINFILE) $(GEN_DIR)/$(PARSERGENC) $(SRC_DIR)/$(SYMTAB) $(GEN_DIR)/$(LEXFILE)  $(CFLAGS)
+
+	@$(CC) $(IFLAGS) $(CFLAGS) -c $(SRC_DIR)/*.c
+	@$(CC) $(IFLAGS) $(CFLAGS) -c $(GEN_DIR)/*.c
 	@mkdir -p $(BUILD_DIR)
-	@#@mv $(MICRO) $(BUILD_DIR)
+	@mv *.o $(BUILD_DIR)
+	@$(CC) -o $(MICRO) $(BUILD_DIR)/*.o $(CFLAGS) $(LFLAGS)
+	@#mv $(MICRO) $(BUILD_DIR)
 	@rm $(PARSERGENC) $(PARSERGENH) $(LEXFILE)	
 
 lexer:	parser

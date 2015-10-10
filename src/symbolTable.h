@@ -10,6 +10,8 @@
 #include "parser.tab.h"
 using namespace std;
 
+#define HASH_TABLE_SIZE 10
+
 
 /*Data type definitions */
 
@@ -44,7 +46,7 @@ class symTab
 	public:
 	char* blockName;
 	list<Symbol*> *symList;
-	stringList* hashTable[10];
+	stringList* hashTable[HASH_TABLE_SIZE];
 	
 	symTab() {blockName = NULL; symList = new list<Symbol*>();}
 	symTab(char* name);

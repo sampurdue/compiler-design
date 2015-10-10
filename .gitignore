@@ -8,4 +8,5 @@ output
 ./step2/Output/*
 ./step3/Output/*
 ./generated
+./build/*
 ./build

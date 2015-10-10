@@ -30,7 +30,7 @@ Symbol::Symbol(int varType, char* str, Value val)
 symTab::symTab(char* name)
 {	
 	int i =0; 
-	while(i<10)
+	while(i<HASH_TABLE_SIZE)
 	{
 		hashTable[i++] = NULL;
 	}
@@ -189,7 +189,7 @@ int addToHashTable(char* str, symTab* Table)
 
 void freeHashTable(stringList* hashTable[])
 {
-	for(int i =0; i < 10; i++)
+	for(int i =0; i < HASH_TABLE_SIZE; i++)
 	{
 		stringList* curr = hashTable[i];
 		stringList* next ;
@@ -218,13 +218,13 @@ int hash(char* str)
 		}
 	}
 	//printf("Key calculated for %s is %d\n",str, key%10);
-	return key%10;
+	return key%HASH_TABLE_SIZE;
 }
 
 void printhashTable(symTab* Table)
 {
 	stringList* curr;
-	for(int i = 0; i<10; i++)
+	for(int i = 0; i<HASH_TABLE_SIZE; i++)
 	{
 		printf("Index %d \n", i);
 		curr = Table->hashTable[i];
@@ -282,6 +282,7 @@ int checkShadowVariable(Symbol* sym)
 	for(; it != shadowSymTabList.end() ; it++)
 	{
 		symTabStack.push(*it);
+		//shadowSymTabList.pop_front(); //remove this. it will cause crash
 	}
 	while(!shadowSymTabList.empty()){shadowSymTabList.pop_front();}
 	return found;

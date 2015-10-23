@@ -1,6 +1,7 @@
 %{
 #include <string.h>
 #include "parser.tab.h"
+#include "ASTNode.h"
 //#define SAVE_TOKEN strcpy(yytext,yylval.string)
 //#define TOKEN(t) (yylval.token = t)
 
@@ -48,14 +49,14 @@ EATUP [\n \t\r]
 "FLOAT"										{return (FLOAT);}
 
 ":=" 										{return ASSIGN_OP;}
-"+" 										{return '+';}
-"-" 										{return '-';}
-"*" 										{return '*';}
-"/" 										{return '/';}
+"+" 										{return ADD_OP;}
+"-" 										{return MINUS_OP;}
+"*" 										{return MUL_OP;}
+"/" 										{return DIV_OP;}
 "=" 										{return EQ_OP;}
 "!=" 										{return NEQ_OP;}
-"<" 										{return '<';}
-">" 										{return '>';}
+"<" 										{return LE_OP;}
+">" 										{return GT_OP;}
 "(" 										{return '(';}
 ")" 										{return ')';}
 ";" 										{return ';';}
@@ -65,11 +66,11 @@ EATUP [\n \t\r]
 
 "\n"										{linenum++;}
 
-{INTLITERAL}								{yylval.iVal = atoi(yytext);return INTLITERAL;}								
+{INTLITERAL}								{yylval.str = strdup(yytext);return INTLITERAL;}								
 												
 												
 
-{FLOATLITERAL}								{yylval.fval = atof(yytext); return FLOATLITERAL;	}	
+{FLOATLITERAL}								{yylval.str = strdup(yytext); return FLOATLITERAL;	}	
 
 
 {STRINGLITERAL}							{yylval.str = strdup(yytext);return STRINGLITERAL;}								

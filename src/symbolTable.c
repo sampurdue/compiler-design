@@ -154,6 +154,53 @@ void printSymbolTable(symTab* symTable)
 	}
 }
 
+Symbol* lookUpSymbolInScope(char* symName)
+{
+	Symbol* retSym = NULL;
+	list<symTab*> tempSymTabList ;
+
+	//check in current scope
+	list<Symbol*>::iterator it = currSymTab->symList->begin();
+	for(; it != currSymTab->symList->end(); it++)
+	{
+		if(!(strcmp((*it)->name, symName)))
+		{
+			retSym = *it;
+			break;
+		}
+	}
+	
+	if(retSym == NULL)
+	{ //check in other tables in scope
+		while(!symTabStack.empty())
+		{
+			symTab* temp = symTabStack.top();
+			tempSymTabList.push_front(temp);
+			symTabStack.pop();
+			//check for symbol in this table
+			list<Symbol*>::iterator it = temp->symList->begin();
+			for(; it != temp->symList->end(); it++)
+			{
+				if(!(strcmp((*it)->name, symName)))
+				{
+					retSym = *it;
+					break;
+				}
+			}
+			if(retSym != NULL)
+				break;
+		}
+		list<symTab*>::iterator it = tempSymTabList.begin();
+		for(; it != tempSymTabList.end() ; it++)
+		{
+			symTabStack.push(*it);
+		}
+		while(!tempSymTabList.empty()){tempSymTabList.pop_front();}
+	}
+	return retSym;
+	
+}
+
 int addToHashTable(char* str, symTab* Table)
 {
 	int idx = hash(str);

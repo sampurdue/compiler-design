@@ -65,6 +65,7 @@ void addStringElementToTable(char* varName, char* strVal);
 void addElementsToTable();
 void freeSymbolTable(symTab* symTable);
 void printSymbolTable(symTab* symTable);
+Symbol* lookUpSymbolInScope(char* symName);
 
 int addToHashTable(char* str, symTab* Table);
 void freeHashTable(stringList* hashTable[]);

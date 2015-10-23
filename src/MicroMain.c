@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	if(accepted == 0)
 	{	
 	//	printf("Accepted\n");
-		printTableList();
+	//	printTableList();
 	}else
 	{
 	//	printf("Not accepted\n");
